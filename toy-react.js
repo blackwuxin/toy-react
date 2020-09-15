@@ -1,43 +1,4 @@
 const RENDER_TO_DOM = Symbol('render to dom'); 
-
-class ElementWrapper {
-    constructor(type) {
-        this.root = document.createElement(type);
-    }
-    setAttribute(name, value) {
-        if(name.match(/^on([\s\S]+)$/)){
-            this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLocaleLowerCase()),value);
-        }else{
-            if(name === 'className'){
-                this.root.setAttribute('class', value);
-            }else{
-                this.root.setAttribute(name, value);
-            }
-        }
-    }
-    appendChild(component) {
-        let range = document.createRange();
-        range.setStart(this.root,this.root.childNodes.length);
-        range.setEnd(this.root,this.root.childNodes.length);
-        range.deleteContents();
-        component[RENDER_TO_DOM](range);
-    }
-    [RENDER_TO_DOM](range){
-        range.deleteContents();
-        range.insertNode(this.root);
-    }
-}
-
-class TextWrapper {
-    constructor(content) {
-        this.root = document.createTextNode(content);
-    }
-    [RENDER_TO_DOM](range){
-        range.deleteContents();
-        range.insertNode(this.root);
-    }
-}
-
 export class Component {
     constructor() {
         this.props = Object.create(null);
@@ -50,6 +11,12 @@ export class Component {
     }
     appendChild(component) {
         this.children.push(component)
+    }
+    get vdom(){
+        return this.render().vdom;
+    }
+    get vchildren(){
+        return this.children.map(child => child.vdom);
     }
     [RENDER_TO_DOM](range){
         this._ranger = range;
@@ -88,6 +55,83 @@ export class Component {
         this.rerender();
     }
 }
+class ElementWrapper extends Component{
+    constructor(type) {
+        super(type);
+        this.type = type;
+        this.root = document.createElement(type);
+    }
+    /*
+    setAttribute(name, value) {
+        if(name.match(/^on([\s\S]+)$/)){
+            this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLocaleLowerCase()),value);
+        }else{
+            if(name === 'className'){
+                this.root.setAttribute('class', value);
+            }else{
+                this.root.setAttribute(name, value);
+            }
+        }
+    }
+    appendChild(component) {
+        let range = document.createRange();
+        range.setStart(this.root,this.root.childNodes.length);
+        range.setEnd(this.root,this.root.childNodes.length);
+        range.deleteContents();
+        component[RENDER_TO_DOM](range);
+    }*/
+    get vdom(){
+        this.vchildren = this.children.map(child => child.vdom);
+        return this;
+        // return {
+        //     type:this.type,
+        //     props:this.props,
+        //     children:this.vchildren
+        // }
+    }
+    [RENDER_TO_DOM](range){
+        range.deleteContents();
+        let root = document.createElement(this.type);
+        for(let name in this.props){
+            let value = this.props[name];
+            if(name.match(/^on([\s\S]+)$/)){
+                root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLocaleLowerCase()),value);
+            }else{
+                if(name === 'className'){
+                    root.setAttribute('class', value);
+                }else{
+                    root.setAttribute(name, value);
+                }
+            }
+        }
+        for(let child of this.children){
+            let childRange = document.createRange();
+            childRange.setStart(root,root.childNodes.length);
+            childRange.setEnd(root,root.childNodes.length);
+            childRange.deleteContents();
+            child[RENDER_TO_DOM](childRange);
+        }
+        range.insertNode(root);
+    }
+}
+
+class TextWrapper extends Component{
+    constructor(content) {
+        super(content);
+        this.type = '#text';
+        this.content = content;
+        this.root = document.createTextNode(content);
+    }
+    get vdom(){
+       return this;
+    }
+    [RENDER_TO_DOM](range){
+        range.deleteContents();
+        range.insertNode(this.root);
+    }
+}
+
+
 
 export function render(component, partentElement) {
     let range = document.createRange();
