@@ -106,6 +106,9 @@ export function createElement(type, attributes, ...children) {
             if (typeof child === 'string') {
                 child = new TextWrapper(child)
             }
+            if(child === null){
+                continue;
+            }
             if (typeof child === 'object' && child instanceof Array) {
                 insertChildren(child);
             } else {
