@@ -6,7 +6,7 @@ export class Component{
         this._root = null;
         this._range = null;
     }
-    setAttribut(name,value){
+    setAttribute(name,value){
         this.props[name] = value;
     }
     appendChild(component){
@@ -19,17 +19,14 @@ export class Component{
     }
 
     rerender(){
-        // let oldRange = this._range;
-        // let range = document.createRange();
-        // range.setStart(oldRange.startContainer,oldRange.StartOffSet);
-        // range.setEnd(oldRange.startContainer,oldRange.StartOffSet);
-        // this[RENDER_TO_DOM](range);
+        let oldRange = this._range;
+        let range = document.createRange();
+        range.setStart(oldRange.startContainer,oldRange.StartOffSet);
+        range.setEnd(oldRange.startContainer,oldRange.StartOffSet);
+        this[RENDER_TO_DOM](range);
 
-        // oldRange.setStart(range.endContainer,range.endOffset);
-        // oldRange.deleteContents();
-
-        this._range.deleteContents();
-        this[RENDER_TO_DOM](this._range);
+        oldRange.setStart(range.endContainer,range.endOffset);
+        oldRange.deleteContents();
     }
 
     setState(newState){
@@ -55,14 +52,14 @@ class ElementWrapper{
     constructor(type){
         this.root = document.createElement(type);
     }
-    setAttribut(name,value){
+    setAttribute(name,value){
         if(name.match(/^on([\s\S]+)$/)){
             this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/,c=>c.toLowerCase()),value);
         }else{
             if(name === 'className'){
-                this.root.setAttribut('class',value);
+                this.root.setAttribute('class',value);
             }else{
-                this.root.setAttribut(name,value);
+                this.root.setAttribute(name,value);
             }
         }
     }
@@ -97,7 +94,7 @@ export function createElement(type,attributes,...children){
     }
 
     for(let p in attributes){
-        e.setAttribut(p,attributes[p]);
+        e.setAttribute(p,attributes[p]);
     }
 
     let insertChildren = (children) =>{
