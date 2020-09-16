@@ -45,7 +45,11 @@ class ElementWrapper{
         }
     }
     appendChild(component){
-        this.root.appendChild(component.root);
+        let range = document.createRange();
+        range.setStart(this.root,this.root.childNodes.length));
+        range.setEnd(this.root,this.root.childNodes.length);
+        range.deleteContents();
+        component[RENDER_TO_DOM](range);
     }
     [RENDER_TO_DOM](range){
         range.deleteContents();
