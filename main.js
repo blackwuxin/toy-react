@@ -1,10 +1,22 @@
 const { render,Component,createElement } = require("./toy-react");
 
 class MyComponent extends Component{
+    constructor(){
+        super();
+        this.state ={
+            a:1,
+            b:1
+        }
+    }
     render(){
         return <div>
             <h1>MyComponent</h1>
-            {this.children}
+            <button onclick={()=>{
+                this.state.a++;
+                this.rerender();
+            }}>add</button>
+            {this.state.a.toString()}
+            {this.state.b.toString()}
         </div>
     }
 }
