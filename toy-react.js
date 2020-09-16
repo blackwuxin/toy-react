@@ -19,14 +19,36 @@ export class Component{
     }
 
     rerender(){
-        let oldRange = this._range;
-        let range = document.createRange();
-        range.setStart(oldRange.startContainer,oldRange.StartOffSet);
-        range.setEnd(oldRange.startContainer,oldRange.StartOffSet);
-        this[RENDER_TO_DOM](range);
+        // let oldRange = this._range;
+        // let range = document.createRange();
+        // range.setStart(oldRange.startContainer,oldRange.StartOffSet);
+        // range.setEnd(oldRange.startContainer,oldRange.StartOffSet);
+        // this[RENDER_TO_DOM](range);
 
-        oldRange.setStart(range.endContainer,range.endOffset);
-        oldRange.deleteContents();
+        // oldRange.setStart(range.endContainer,range.endOffset);
+        // oldRange.deleteContents();
+
+        this._range.deleteContents();
+        this[RENDER_TO_DOM](this._range);
+    }
+
+    setState(newState){
+        if(this.state === null || typeof this.state !== 'object'){
+            this.state = newState;
+            this.rerender();
+            return;
+        }
+        let merge = (oldState,newState) => {
+            for(let p in newState){
+                if(oldState[p] === null || typeof oldState[p] !== 'object'){
+                    oldState[p] = newState[p];
+                }else{
+                    merge(oldState[p],newState[p]);
+                }
+            }
+        }
+        merge(this.state,newState);
+        this.rerender();
     }
 }
 class ElementWrapper{

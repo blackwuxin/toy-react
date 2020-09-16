@@ -12,11 +12,13 @@ class MyComponent extends Component{
         return <div>
             <h1>MyComponent</h1>
             <button onclick={()=>{
-                this.state.a++;
-                this.rerender();
+                this.setState({a:this.state.a+1});
+                // this.state.a++;
+                // this.rerender();
             }}>add</button>
             {this.state.a.toString()}
             {this.state.b.toString()}
+
         </div>
     }
 }
