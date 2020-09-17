@@ -12,7 +12,9 @@ export class Component{
     appendChild(component){
         this.children.push(component);
     }
-
+    get vdom(){
+        return this.render().vdom;
+    }
     [RENDER_TO_DOM](range){
         this._range = range;
         this.render()[RENDER_TO_DOM](range)
@@ -48,36 +50,53 @@ export class Component{
         this.rerender();
     }
 }
-class ElementWrapper{
+class ElementWrapper extends Component{
     constructor(type){
+        super(type);
+        this.type = type;
         this.root = document.createElement(type);
     }
-    setAttribute(name,value){
-        if(name.match(/^on([\s\S]+)$/)){
-            this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/,c=>c.toLowerCase()),value);
-        }else{
-            if(name === 'className'){
-                this.root.setAttribute('class',value);
-            }else{
-                this.root.setAttribute(name,value);
-            }
-        }
-    }
-    appendChild(component){
-        let range = document.createRange();
-        range.setStart(this.root,this.root.childNodes.length);
-        range.setEnd(this.root,this.root.childNodes.length);
-        range.deleteContents();
-        component[RENDER_TO_DOM](range);
+    // setAttribute(name,value){
+    //     if(name.match(/^on([\s\S]+)$/)){
+    //         this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/,c=>c.toLowerCase()),value);
+    //     }else{
+    //         if(name === 'className'){
+    //             this.root.setAttribute('class',value);
+    //         }else{
+    //             this.root.setAttribute(name,value);
+    //         }
+    //     }
+    // }
+    // appendChild(component){
+    //     let range = document.createRange();
+    //     range.setStart(this.root,this.root.childNodes.length);
+    //     range.setEnd(this.root,this.root.childNodes.length);
+    //     range.deleteContents();
+    //     component[RENDER_TO_DOM](range);
+    // }
+    get vdom(){
+        return{
+            type:this.type,
+            props:this.props,
+            children:this.children.map(child => child.vdom)
+        };
     }
     [RENDER_TO_DOM](range){
         range.deleteContents();
         range.insertNode(this.root);
     }
 }
-class TextWrapper{
+class TextWrapper extends Component{
     constructor(content){
+        super(content);
+        this.content = content;
         this.root = document.createTextNode(content)
+    }
+    get vdom(){
+        return {
+            type:'#text',
+            content:this.content
+        }
     }
     [RENDER_TO_DOM](range){
         range.deleteContents();
