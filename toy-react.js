@@ -5,7 +5,15 @@ class ElementWrapper{
        this.root = document.createElement(type);
     }
     setAttribute(name,value){
-       this.root.setAttribute(name,value);
+       if(name.match(/^on([\s\S]+)$/)){
+           this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/,c => c.toLowerCase()),value);
+       }else {
+           if(name === 'className'){
+               this.root.setAttribute('class',value);
+           }else{
+            this.root.setAttribute(name,value);
+           }
+       }
     }
     appendChild(component){
         this.root.appendChild(component.root);
@@ -42,6 +50,16 @@ export class Component{
     [RENDER_TO_DOM](range){
         this._range = range;
         this.render()[RENDER_TO_DOM](range);
+    }
+    rerender(){
+        let OldRange = this._range;
+        let range = document.createRange();
+        range.setStart(OldRange.startContainer,OldRange.StartOffSet);
+        range.setEnd(OldRange.startContainer,OldRange.StartOffSet);
+        this[RENDER_TO_DOM](range);
+        
+        OldRange.setStart(range.endContainer,range.endOffset);
+        OldRange.deleteContents();
     }
 }
 
