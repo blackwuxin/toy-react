@@ -27,3 +27,10 @@ render(<MyComponent id="a" class ="c">
     <div>123</div>
     <div></div>
 </MyComponent>,document.body);
+
+// let a = <MyComponent id="a" class ="c">
+//      <div>123</div>
+//      <div></div>
+//  </MyComponent>;
+
+// console.log(a.vdom);
