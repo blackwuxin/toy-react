@@ -16,7 +16,12 @@ class ElementWrapper{
        }
     }
     appendChild(component){
-        this.root.appendChild(component.root);
+        // this.root.appendChild(component.root);
+        let range = document.createRange();
+        range.setStart(this.root,this.root.childNodes.length);
+        range.setEnd(this.root,this.root.childNodes.length);
+        range.deleteContents();
+        component[RENDER_TO_DOM](range);
     }
     [RENDER_TO_DOM](range){
         range.deleteContents();
@@ -60,6 +65,26 @@ export class Component{
         
         OldRange.setStart(range.endContainer,range.endOffset);
         OldRange.deleteContents();
+        // this._range.deleteContents();
+        // this[RENDER_TO_DOM](this._range);
+    }
+    setState(newState){
+        if(this.state == null || typeof this.state !== 'object'){
+            this.state = newState;
+            this.rerender();
+            return;
+        }
+        let merge = (oldState,newState) => {
+            for(let p in newState){
+                if(oldState[p] === null || typeof oldState[p] !== 'object'){
+                    oldState[p] = newState[p];
+                }else{
+                    merge(oldState[p],newState[p]);
+                }
+            }
+        }
+        merge(this.state,newState);
+        this.rerender();
     }
 }
 
